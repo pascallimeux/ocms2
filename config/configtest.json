@@ -1,0 +1,18 @@
+{
+    "logger":"Trace",
+    "logFileName":"/var/log/ocms/ocmstest.log",
+    "httpHyperledger":"http://10.194.18.49:7050",
+	"chainCodePath":"github.com/orangelabs/consent",
+	"chainCodeName":"41149f5089e76b3b95fcf20e25a64fde7be07452b602dafe78f192bf826c14da25a3767c3a281255f4f355842a5a87a366aca65f44f5a02afc1784417079b76e",
+	"enrollID":"orange_user",
+	"enrollSecret":"GtflmdhF6K32",
+    "httpHostUrl":"10.194.7.224:8020",
+    "readTimeout":5000000000,
+    "writeTimeout":10000000000,
+    "handlerTimeout":12000000000,
+    "applicationID": "280399A20162908Z",
+    "HLTimeout":10000000000,
+    "DeployTimeout":7000000000,
+    "TransactionTimeout":5000000000
+}
+
