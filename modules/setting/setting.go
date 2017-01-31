@@ -35,6 +35,9 @@ type Settings struct {
 	HLTimeout          time.Duration
 	DeployTimeout      time.Duration
 	TransactionTimeout time.Duration
+	HttpHyperledger    string
+	ChainCodePath      string
+	ChainCodeName      string
 }
 
 func (s *Settings) ToString() string {
@@ -69,6 +72,11 @@ func GetSettings(configPath, configFileName string) (Settings, error) {
 		configuration.DeployTimeout = viper.GetDuration("server.deployTimeout")
 
 		configuration.ExpireInToken = viper.GetDuration("token.expireInToken")
+
+		configuration.HttpHyperledger = viper.GetString("hyperledger.httpHyperledger")
+		configuration.ChainCodePath = viper.GetString("hyperledger.chainCodePath")
+		configuration.ChainCodeName = viper.GetString("hyperledger.chainCodeName")
+
 		fmt.Println(configuration.ToString())
 		return configuration, nil
 	}
