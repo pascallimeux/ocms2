@@ -16,8 +16,9 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/pascallimeux/auth/model"
-	"github.com/pascallimeux/auth/modules/log"
+	"github.com/pascallimeux/ocms2/modules/auth/model"
+	"github.com/pascallimeux/ocms2/modules/common"
+	"github.com/pascallimeux/ocms2/modules/log"
 	"net/http"
 	"strconv"
 )
@@ -26,7 +27,7 @@ import (
 func (a *AppContext) postRole(w http.ResponseWriter, r *http.Request) {
 	log.Trace(log.Here(), "postRole() : calling method -")
 
-	err1 := a.checkPermissionFromToken(w, r, "postRole", "")
+	err1 := a.CheckPermissionFromToken(w, r, "postRole", "")
 	if err1 != nil {
 		return
 	}
@@ -34,24 +35,24 @@ func (a *AppContext) postRole(w http.ResponseWriter, r *http.Request) {
 	var role model.Role
 	err := json.NewDecoder(r.Body).Decode(&role)
 	if err != nil {
-		sendError(log.Here(), w, err)
+		common.SendError(log.Here(), w, err)
 		return
 	}
 	role, err = a.SqlContext.CreateRole(role)
 	if err != nil {
-		sendError(log.Here(), w, err)
+		common.SendError(log.Here(), w, err)
 		return
 	}
 	roleString, _ := json.Marshal(role)
 	log.Trace(log.Here(), "create role:", string(roleString))
-	buildHttp201Response(w, role)
+	common.BuildHttp201Response(w, role)
 }
 
 //HTTP Get - /o/role/{id}
 func (a *AppContext) getRole(w http.ResponseWriter, r *http.Request) {
 	log.Trace(log.Here(), "getRole() : calling method -")
 
-	err1 := a.checkPermissionFromToken(w, r, "getRole", "")
+	err1 := a.CheckPermissionFromToken(w, r, "getRole", "")
 	if err1 != nil {
 		return
 	}
@@ -59,30 +60,30 @@ func (a *AppContext) getRole(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	code, err1 := strconv.Atoi(vars["id"])
 	if err1 != nil {
-		sendError(log.Here(), w, err1)
+		common.SendError(log.Here(), w, err1)
 		return
 	}
 	role, err2 := a.SqlContext.GetRole(code)
 	if err2 != nil {
-		sendError(log.Here(), w, err2)
+		common.SendError(log.Here(), w, err2)
 		return
 	}
-	buildHttp200Response(w, role)
+	common.BuildHttp200Response(w, role)
 }
 
 //HTTP Get - /o/role
 func (a *AppContext) getRoles(w http.ResponseWriter, r *http.Request) {
 	log.Trace(log.Here(), "getRoles() : calling method -")
 
-	err1 := a.checkPermissionFromToken(w, r, "getRoles", "")
+	err1 := a.CheckPermissionFromToken(w, r, "getRoles", "")
 	if err1 != nil {
 		return
 	}
 
 	roles, err := a.SqlContext.GetRoles()
 	if err != nil {
-		sendError(log.Here(), w, err)
+		common.SendError(log.Here(), w, err)
 		return
 	}
-	buildHttp200Response(w, roles)
+	common.BuildHttp200Response(w, roles)
 }

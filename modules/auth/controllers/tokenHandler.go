@@ -16,7 +16,8 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"github.com/pascallimeux/auth/modules/log"
+	"github.com/pascallimeux/ocms2/modules/common"
+	"github.com/pascallimeux/ocms2/modules/log"
 	"net/http"
 	"strings"
 )
@@ -34,27 +35,27 @@ func (a *AppContext) getToken(w http.ResponseWriter, r *http.Request) {
 	var authent Authent
 	err := json.NewDecoder(r.Body).Decode(&authent)
 	if err != nil {
-		sendError(log.Here(), w, err)
+		common.SendError(log.Here(), w, err)
 		return
 	}
 
 	if authent.Username == "" {
-		sendError(log.Here(), w, errors.New("no username given"))
+		common.SendError(log.Here(), w, errors.New("no username given"))
 		return
 	}
 	if authent.Password == "" {
-		sendError(log.Here(), w, errors.New("no password given"))
+		common.SendError(log.Here(), w, errors.New("no password given"))
 		return
 	}
 
 	user, err2 := a.SqlContext.GetUserByCredentials(authent.Username, authent.Password)
 	if err2 != nil {
-		sendError(log.Here(), w, err2)
+		common.SendError(log.Here(), w, err2)
 		return
 	}
 
 	if !user.Activated {
-		sendError(log.Here(), w, errors.New("user not activated"))
+		common.SendError(log.Here(), w, errors.New("user not activated"))
 		return
 	}
 
@@ -64,21 +65,21 @@ func (a *AppContext) getToken(w http.ResponseWriter, r *http.Request) {
 		log.Trace(log.Here(), "The user: ", user.Username, " is granted to get a token")
 	} else {
 		log.Trace(log.Here(), "The user: ", user.Username, " is not authorized get a token")
-		sendError(log.Here(), w, errors.New("User not authorized for this resource!"))
+		common.SendError(log.Here(), w, errors.New("User not authorized for this resource!"))
 		return
 	}
 	expire_in := a.Settings.ExpireInToken
 	token, err3 := a.SqlContext.CreateToken(user, expire_in)
 	if err3 != nil {
-		sendError(log.Here(), w, err3)
+		common.SendError(log.Here(), w, err3)
 		return
 	}
 	tokenString, _ := json.Marshal(token)
 	log.Trace(log.Here(), "create token:", string(tokenString))
-	buildHttp201Response(w, token)
+	common.BuildHttp201Response(w, token)
 }
 
-func (a *AppContext) checkPermissionFromToken(w http.ResponseWriter, r *http.Request, resourceName, resourceId string) error {
+func (a *AppContext) CheckPermissionFromToken(w http.ResponseWriter, r *http.Request, resourceName, resourceId string) error {
 	log.Trace(log.Here(), "checkPermissionFromToken() : calling method -")
 	tokenValue, err1 := extractTokenFromHeader(r)
 	if err1 != nil {
@@ -87,7 +88,7 @@ func (a *AppContext) checkPermissionFromToken(w http.ResponseWriter, r *http.Req
 	}
 	err := a.SqlContext.IsAuthorized4Token(tokenValue, resourceName, resourceId)
 	if err != nil {
-		buildHttp401Response(w)
+		common.BuildHttp401Response(w)
 	}
 	return err
 }

@@ -16,8 +16,8 @@ package hyperledger
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/pascallimeux/ocms/utils"
-	"github.com/pascallimeux/ocms/utils/log"
+	"github.com/pascallimeux/ocms2/modules/common"
+	"github.com/pascallimeux/ocms2/modules/log"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -43,7 +43,7 @@ const (
 
 func (h *HP_Helper) Registar(enrollId, enrollSecret string) (SimpleResponse, error) {
 	log.Trace(log.Here(), "Registar() : calling method -")
-	timer := utils.Timer{}
+	timer := common.Timer{}
 	timer.StartTimer()
 	response := SimpleResponse{}
 	url := h.HttpHyperledger + REGISTAR
@@ -65,7 +65,7 @@ func (h *HP_Helper) Registar(enrollId, enrollSecret string) (SimpleResponse, err
 
 func (h *HP_Helper) IsRegistar(enrollId string) (SimpleResponse, error) {
 	log.Trace(log.Here(), "IsRegistar() : calling method -")
-	timer := utils.Timer{}
+	timer := common.Timer{}
 	timer.StartTimer()
 	response := SimpleResponse{}
 	url := h.HttpHyperledger + REGISTAR + "/" + enrollId
@@ -82,7 +82,7 @@ func (h *HP_Helper) IsRegistar(enrollId string) (SimpleResponse, error) {
 
 func (h *HP_Helper) DeployChainCode(smartcontract_path, hp_account, function string, args []string) (Response, error) {
 	log.Trace(log.Here(), "DeployChainCode() : calling method -")
-	timer := utils.Timer{}
+	timer := common.Timer{}
 	timer.StartTimer()
 	response := Response{}
 	url := h.HttpHyperledger + CHAINCODE
@@ -104,7 +104,7 @@ func (h *HP_Helper) DeployChainCode(smartcontract_path, hp_account, function str
 
 func (h *HP_Helper) Invoke(chaincode_name, hp_account, function string, args []string) (Response, error) {
 	log.Trace(log.Here(), "Invoke() : calling method -")
-	timer := utils.Timer{}
+	timer := common.Timer{}
 	timer.StartTimer()
 	response := Response{}
 	url := h.HttpHyperledger + CHAINCODE
@@ -126,7 +126,7 @@ func (h *HP_Helper) Invoke(chaincode_name, hp_account, function string, args []s
 
 func (h *HP_Helper) Query(chaincode_name, hp_account, function string, args []string) (Response, error) {
 	log.Trace(log.Here(), "Query() : calling method -")
-	timer := utils.Timer{}
+	timer := common.Timer{}
 	timer.StartTimer()
 	response := Response{}
 	url := h.HttpHyperledger + CHAINCODE
@@ -148,7 +148,7 @@ func (h *HP_Helper) Query(chaincode_name, hp_account, function string, args []st
 
 func (h *HP_Helper) GetTransaction(transaction_uuid string) (Transaction, error) {
 	log.Trace(log.Here(), "GetTransaction() : calling method -")
-	timer := utils.Timer{}
+	timer := common.Timer{}
 	timer.StartTimer()
 	response := Transaction{}
 	url := h.HttpHyperledger + TRANSACTION + "/" + transaction_uuid
@@ -174,7 +174,7 @@ func BuildResponse(response interface{}, resp *http.Response) error {
 	if err != nil {
 		return err
 	}
-	responseToString, err := utils.StructToString(response)
+	responseToString, err := common.StructToString(response)
 	if err == nil {
 		log.Trace(log.Here(), "RESPONSE: ", responseToString)
 	}

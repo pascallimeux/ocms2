@@ -51,7 +51,7 @@ type Permission struct {
 }
 
 type Logg struct {
-	CreatedAt      time.Time `json:"created_at"`
+	Timestamp      time.Time `json:"timestamp"`
 	Resource_name  string    `json:"resource_name"`
 	Resource_param string    `json:"resource_param"`
 	User_id        string    `json:"user_id"` // foreign key with user table

@@ -16,13 +16,13 @@ package model
 import (
 	"errors"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/pascallimeux/auth/modules/log"
+	"github.com/pascallimeux/ocms2/modules/log"
 	"time"
 )
 
 func (a *SqlContext) CreateLog(logs Logg) (Logg, error) {
 	log.Trace(log.Here(), "CreateLog() : calling method -")
-	sql := "insert or replace into logs (CreatedAt, Resource_name, Resource_param, User_id, Username, Access_granted) values (?, ?, ?, ?, ?, ?) "
+	sql := "insert or replace into logs (Timestamp, Resource_name, Resource_param, User_id, Username, Access_granted) values (?, ?, ?, ?, ?, ?) "
 
 	stmt, err1 := a.Db.Prepare(sql)
 	if err1 != nil {
@@ -30,7 +30,7 @@ func (a *SqlContext) CreateLog(logs Logg) (Logg, error) {
 	}
 	defer stmt.Close()
 
-	result, err2 := stmt.Exec(logs.CreatedAt, logs.Resource_name, logs.Resource_param, logs.User_id, logs.Username, logs.Access_granted)
+	result, err2 := stmt.Exec(logs.Timestamp, logs.Resource_name, logs.Resource_param, logs.User_id, logs.Username, logs.Access_granted)
 	if err2 != nil {
 		return logs, err2
 	}
@@ -55,7 +55,7 @@ func (a *SqlContext) GetLogs() ([]Logg, error) {
 	defer rows.Close()
 	for rows.Next() {
 		logs := Logg{}
-		err2 := rows.Scan(&logs.CreatedAt, &logs.Resource_name, &logs.Resource_param, &logs.User_id, &logs.Username, &logs.Access_granted)
+		err2 := rows.Scan(&logs.Timestamp, &logs.Resource_name, &logs.Resource_param, &logs.User_id, &logs.Username, &logs.Access_granted)
 		if err2 != nil {
 			return result, err2
 		}
@@ -66,7 +66,7 @@ func (a *SqlContext) GetLogs() ([]Logg, error) {
 
 func (a *SqlContext) GetLog4Period(date1, date2 time.Time) ([]Logg, error) {
 	log.Trace(log.Here(), "GetLog4Period() : calling method -")
-	sql := "select * from logs where CreatedAt > ? and CreatedAt < ?"
+	sql := "select * from logs where Timestamp > ? and Timestamp < ?"
 	var result = make([]Logg, 0)
 
 	stmt, err := a.Db.Prepare(sql)
@@ -82,7 +82,7 @@ func (a *SqlContext) GetLog4Period(date1, date2 time.Time) ([]Logg, error) {
 	defer rows.Close()
 	for rows.Next() {
 		logs := Logg{}
-		err2 := rows.Scan(&logs.CreatedAt, &logs.Resource_name, &logs.Resource_param, &logs.User_id, &logs.Username, &logs.Access_granted)
+		err2 := rows.Scan(&logs.Timestamp, &logs.Resource_name, &logs.Resource_param, &logs.User_id, &logs.Username, &logs.Access_granted)
 		if err2 != nil {
 			return result, err2
 		}

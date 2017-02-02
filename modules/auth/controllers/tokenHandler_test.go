@@ -15,17 +15,13 @@ package controllers
 
 import (
 	"encoding/json"
-	"errors"
-	"github.com/pascallimeux/auth/common"
-	"github.com/pascallimeux/auth/model"
-	"io/ioutil"
+	"github.com/pascallimeux/ocms2/modules/auth/setting"
 	"net/http"
-	"strings"
 	"testing"
 )
 
 func TestCreateTokenNominal(t *testing.T) {
-	token, err0 := getToken(common.ADMINLOGIN, common.ADMINPWD)
+	token, err0 := getToken(setting.ADMINLOGIN, setting.ADMINPWD)
 	if err0 != nil {
 		t.Error(err0)
 	}
@@ -48,7 +44,7 @@ func TestUserTokenNominal(t *testing.T) {
 	password := "user_pwd1"
 	email := "user1@orange.fr"
 	role := 3
-	token, err0 := getToken(common.ADMINLOGIN, common.ADMINPWD)
+	token, err0 := getToken(setting.ADMINLOGIN, setting.ADMINPWD)
 	if err0 != nil {
 		t.Error(err0)
 	}
@@ -57,7 +53,7 @@ func TestUserTokenNominal(t *testing.T) {
 		t.Error(err)
 	}
 
-	token, err2 := getToken(username, password)
+	token, err2 := GetToken(username, password)
 	if err2 != nil {
 		t.Error(err2)
 	}
@@ -72,149 +68,4 @@ func TestUserTokenNominal(t *testing.T) {
 	if statusCode != http.StatusOK {
 		t.Error("Non-expected status code: %v\n\tbody: %v\n", http.StatusOK, statusCode)
 	}
-}
-
-func getToken(username, password string) (model.Token, error) {
-	token := model.Token{}
-	credentials := "{\"Username\":\"" + username + "\",\"Password\":\"" + password + "\"}"
-
-	request, err1 := buildRequest("POST", AUTHURI, credentials)
-	if err1 != nil {
-		return token, err1
-	}
-	status, body_bytes, err2 := ExecuteRequest(request)
-	if err2 != nil {
-		return token, err2
-	}
-
-	if status != http.StatusCreated {
-		return token, errors.New("bad http status")
-	}
-
-	err3 := json.Unmarshal(body_bytes, &token)
-	if err3 != nil {
-		return token, err3
-	}
-	return token, nil
-}
-
-func createUser(tokenValue string, httpUser HttpUser) (model.User, int, error) {
-	var user model.User
-	data, _ := json.Marshal(httpUser)
-	request, err1 := buildRequestWithToken("POST", REGISTERURI, string(data), tokenValue)
-	if err1 != nil {
-		return user, 0, err1
-	}
-	status, body_bytes, err2 := ExecuteRequest(request)
-	if err2 != nil {
-		return user, status, err2
-	}
-	err := json.Unmarshal(body_bytes, &user)
-	if err != nil {
-		return user, status, err
-	}
-	return user, status, nil
-}
-
-func getUser(tokenValue, userID string) (model.User, int, error) {
-	var user model.User
-	request, err := buildRequestWithToken("GET", USERURI+"/"+userID, " ", tokenValue)
-	if err != nil {
-		return user, 0, err
-	}
-	status, body_bytes, err2 := ExecuteRequest(request)
-	if err2 != nil {
-		return user, status, err2
-	}
-	err = json.Unmarshal(body_bytes, &user)
-	if err != nil {
-		return user, status, err
-	}
-	return user, status, nil
-}
-
-func getListOfUsers(tokenValue string) ([]model.User, int, error) {
-	users := []model.User{}
-	request, err := buildRequestWithToken("GET", USERURI, " ", tokenValue)
-	if err != nil {
-		return users, 0, err
-	}
-	status, body_bytes, err2 := ExecuteRequest(request)
-	if err2 != nil {
-		return users, status, err2
-	}
-	err = json.Unmarshal(body_bytes, &users)
-	if err != nil {
-		return users, status, err
-	}
-	return users, status, nil
-}
-
-func updateUser(tokenValue, data string) (model.User, int, error) {
-	user := model.User{}
-	request, err := buildRequestWithToken("PUT", USERURI, data, tokenValue)
-	if err != nil {
-		return user, 0, err
-	}
-	status, body_bytes, err2 := ExecuteRequest(request)
-	if err2 != nil {
-		return user, status, err2
-	}
-	err = json.Unmarshal(body_bytes, &user)
-	if err != nil {
-		return user, status, err
-	}
-
-	return user, status, nil
-}
-
-func deleteUser(tokenValue string, userID string) error {
-	request, err := buildRequestWithToken("DELETE", USERURI+"/"+userID, " ", tokenValue)
-	if err != nil {
-		return err
-	}
-	_, _, err2 := ExecuteRequest(request)
-	if err2 != nil {
-		return err2
-	}
-	return nil
-}
-
-func buildRequest(method, uri, data string) (*http.Request, error) {
-	var requestData *strings.Reader
-	if data != "" {
-		requestData = strings.NewReader(data)
-	} else {
-		requestData = nil
-	}
-	request, err := http.NewRequest(method, httpServerTest.URL+uri, requestData)
-	if err != nil {
-		return request, err
-	}
-	return request, nil
-}
-
-func buildRequestWithToken(method, uri, data, tokenValue string) (*http.Request, error) {
-	request, err := buildRequest(method, uri, data)
-	if err != nil {
-		return request, err
-	}
-	request.Header.Set("authorization", "bearer "+tokenValue)
-	return request, nil
-}
-
-func ExecuteRequest(request *http.Request) (int, []byte, error) {
-	status := 0
-	client := &http.Client{}
-	response, err := client.Do(request)
-	if err != nil {
-		return status, nil, err
-	}
-	status = response.StatusCode
-	body_bytes, err2 := ioutil.ReadAll(response.Body)
-	defer response.Body.Close()
-	if err2 != nil {
-		return status, body_bytes, err2
-	}
-	return status, body_bytes, nil
 }

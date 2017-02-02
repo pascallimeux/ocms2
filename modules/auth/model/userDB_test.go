@@ -15,8 +15,8 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/pascallimeux/auth/common"
-	"github.com/pascallimeux/auth/utils/log"
+	"github.com/pascallimeux/ocms2/modules/auth/setting"
+	"github.com/pascallimeux/ocms2/modules/log"
 	"golang.org/x/crypto/bcrypt"
 	"os"
 	"testing"
@@ -39,18 +39,16 @@ func setup() {
 	var err error
 
 	// Init config
-	config := common.Configuration{DataSourceName: "/tmp/auth_test.db", LogFileName: "/tmp/test.log", Logger: "Trace"}
+	config := setting.Settings{DataSourceName: "/tmp/auth_test.db", LogFileName: "/tmp/test.log", LogMode: "Trace"}
 
 	// Init logger
-	logfile = log.Init_log(config.LogFileName, config.Logger)
+	logfile = log.Init_log(config.LogFileName, config.LogMode)
 
 	// Init sqliteDB
-	sqlContext, err = GetSqlContext(config.DataSourceName)
+	sqlContext, err = GetSqlContext(config.DataSourceName, true)
 	if err != nil {
 		log.Fatal(log.Here(), err.Error())
 	}
-	sqlContext.InitBDD()
-
 }
 
 func shutdown() {

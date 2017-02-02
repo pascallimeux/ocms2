@@ -15,8 +15,8 @@ package model
 
 import (
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/pascallimeux/auth/modules/log"
-	"github.com/pascallimeux/auth/modules/setting"
+	"github.com/pascallimeux/ocms2/modules/auth/setting"
+	"github.com/pascallimeux/ocms2/modules/log"
 )
 
 func (s *SqlContext) InitBDD() {
@@ -68,7 +68,7 @@ func (s *SqlContext) CreateTables() {
 	if err != nil {
 		log.Fatal(log.Here(), err.Error())
 	}
-	_, err = s.Db.Exec("create table if not exists logs (CreatedAt datetime, Resource_name varchar(255), Resource_param varchar(255), User_id varchar(255), Username varchar(255), Access_granted boolean, FOREIGN KEY (User_id) REFERENCES users(Id) )")
+	_, err = s.Db.Exec("create table if not exists logs (Timestamp datetime, Resource_name varchar(255), Resource_param varchar(255), User_id varchar(255), Username varchar(255), Access_granted boolean, FOREIGN KEY (User_id) REFERENCES users(Id) )")
 	if err != nil {
 		log.Fatal(log.Here(), err.Error())
 	}
@@ -161,6 +161,7 @@ func (s *SqlContext) CreateInitialPermissions() error {
 	perms = append(perms, Permission{Resource_name: "deleteUser", Role_code: 1, Owner_only: false})
 
 	perms = append(perms, Permission{Resource_name: "getLogs", Role_code: 1, Owner_only: false})
+
 	for _, perm := range perms {
 		_, err := s.CreatePermission(perm)
 		if err != nil {

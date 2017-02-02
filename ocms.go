@@ -1,5 +1,5 @@
 /*
-Copyright Pascal Limeux. 2016 All Rights Reserved.
+Copyright Pascal Limeux. 2017 All Rights Reserved.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,12 +14,11 @@ limitations under the License.
 package main
 
 import (
-	"github.com/pascallimeux/ocms/api"
-	"github.com/pascallimeux/ocms/common"
-	"github.com/pascallimeux/ocms/hyperledger"
-	"github.com/pascallimeux/ocms/hyperledger/consent"
-	"github.com/pascallimeux/ocms/utils"
-	"github.com/pascallimeux/ocms/utils/log"
+	"github.com/pascallimeux/ocms2/controllers"
+	"github.com/pascallimeux/ocms2/hyperledger"
+	auth "github.com/pascallimeux/ocms2/modules/auth/initialize"
+	"github.com/pascallimeux/ocms2/modules/log"
+	"github.com/pascallimeux/ocms2/setting"
 	"net/http"
 	"os"
 	"time"
@@ -27,44 +26,47 @@ import (
 
 func main() {
 
-	// get arguments
-	config_file := "config.json"
+	// Check command line parameters
+	initDB := false
 	args := os.Args[1:]
-	if len(args) == 1 {
-		config_file = args[0]
+	if len(args) >= 1 && args[0] == "init" {
+		initDB = true
 	}
 
-	// Init configuration
-	var configuration common.Configuration
-	err := utils.Read_Conf(config_file, &configuration)
+	// Init settings
+	configuration, err := setting.GetSettings(".", "settings")
 	if err != nil {
 		panic(err.Error())
 	}
 
 	// Init logger
-	f := log.Init_log(configuration.LogFileName, configuration.Logger)
+	f := log.Init_log(configuration.LogFileName, configuration.LogMode)
 	defer f.Close()
 
-	// Get local IP address if possible
-	ipAddress, err := utils.GetOutboundIP()
-	if err != nil {
-		log.Error(log.Here(), " Impossible to retrieve the IP address of this machine")
-	} else {
-		configuration.HttpHostUrl = ipAddress + ":8020"
+	// Init Auth mode
+	router, authContext, err2 := auth.Init(initDB, nil)
+	if err2 != nil {
+		panic(err2.Error())
 	}
-
-	// Write configuration in log
-	log.Info(log.Here(), utils.Get_fields(configuration))
+	defer authContext.SqlContext.Db.Close()
 
 	// Init Hyperledger helpers
 	HP_helper := hyperledger.HP_Helper{HttpHyperledger: configuration.HttpHyperledger, HLTimeout: configuration.HLTimeout}
-	Consent_Helper := consent.Consent_Helper{HP_helper: HP_helper, ChainCodePath: configuration.ChainCodePath, ChainCodeName: configuration.ChainCodeName, EnrollID: configuration.EnrollID, EnrollSecret: configuration.EnrollSecret}
+	Consent_Helper := hyperledger.Consent_Helper{HP_helper: HP_helper, ChainCodePath: configuration.ChainCodePath, ChainCodeName: configuration.ChainCodeName, EnrollID: configuration.EnrollID, EnrollSecret: configuration.EnrollSecret}
 
 	// Init application context
-	appContext := api.AppContext{Consent_helper: Consent_Helper, Configuration: configuration}
+	appContext := controllers.AppContext{Consent_helper: Consent_Helper, Configuration: configuration, AuthContext: authContext}
+
+	// Init permissions for application
+	err3 := appContext.InitPermissions()
+	if err3 != nil {
+		panic(err3.Error())
+	}
+
+	// Init routes for application
+	appContext.CreateOCMSRoutes(router)
 
 	// Start http server
-	router := appContext.CreateRoutes()
 	log.Info(log.Here(), "Listening on: ", configuration.HttpHostUrl)
 	s := &http.Server{
 		Addr:         configuration.HttpHostUrl,

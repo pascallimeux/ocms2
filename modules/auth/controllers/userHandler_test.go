@@ -15,9 +15,9 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/pascallimeux/auth/common"
-	"github.com/pascallimeux/auth/model"
-	"github.com/pascallimeux/auth/utils/log"
+	"github.com/pascallimeux/ocms2/modules/auth/model"
+	"github.com/pascallimeux/ocms2/modules/auth/setting"
+	"github.com/pascallimeux/ocms2/modules/log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -42,24 +42,23 @@ func setup() {
 	var err error
 
 	// Init config
-	config := common.Configuration{DataSourceName: "/tmp/auth_test.db", LogFileName: "/tmp/test.log", Logger: "Trace", Expire_in_token_in_hour: 24}
+	config := setting.Settings{DataSourceName: "/tmp/auth_test.db", LogFileName: "/tmp/test.log", LogMode: "Trace", ExpireInToken: 24}
 
 	// Init logger
-	logfile = log.Init_log(config.LogFileName, config.Logger)
+	logfile = log.Init_log(config.LogFileName, config.LogMode)
 
 	// Init application context
-	appContext := AppContext{Configuration: config}
+	appContext := AppContext{Settings: &config}
 
 	// Init sqliteDB
-	sqlContext, err = model.GetSqlContext(config.DataSourceName)
+	sqlContext, err = model.GetSqlContext(config.DataSourceName, true)
 	if err != nil {
 		log.Fatal(log.Here(), err.Error())
 	}
 	appContext.SqlContext = sqlContext
-	sqlContext.InitBDD()
 
 	// Init http server
-	router := appContext.CreateRoutes()
+	router := appContext.CreateAUTHRoutes()
 	httpServerTest = httptest.NewServer(router)
 }
 
@@ -71,7 +70,7 @@ func shutdown() {
 }
 
 func TestCreateUserNominal(t *testing.T) {
-	token, err0 := getToken(common.ADMINLOGIN, common.ADMINPWD)
+	token, err0 := getToken(setting.ADMINLOGIN, setting.ADMINPWD)
 	if err0 != nil {
 		t.Error(err0)
 	}
@@ -88,7 +87,7 @@ func TestCreateUserNominal(t *testing.T) {
 }
 
 func TestGetUserNominal(t *testing.T) {
-	token, err0 := getToken(common.ADMINLOGIN, common.ADMINPWD)
+	token, err0 := getToken(setting.ADMINLOGIN, setting.ADMINPWD)
 	if err0 != nil {
 		t.Error(err0)
 	}
@@ -109,7 +108,7 @@ func TestGetUserNominal(t *testing.T) {
 }
 
 func TestGetUsersNominal(t *testing.T) {
-	token, err0 := getToken(common.ADMINLOGIN, common.ADMINPWD)
+	token, err0 := getToken(setting.ADMINLOGIN, setting.ADMINPWD)
 	if err0 != nil {
 		t.Error(err0)
 	}
@@ -130,7 +129,7 @@ func TestGetUsersNominal(t *testing.T) {
 }
 
 func TestUpdateUserNominal(t *testing.T) {
-	token, err0 := getToken(common.ADMINLOGIN, common.ADMINPWD)
+	token, err0 := getToken(setting.ADMINLOGIN, setting.ADMINPWD)
 	if err0 != nil {
 		t.Error(err0)
 	}
@@ -154,7 +153,7 @@ func TestUpdateUserNominal(t *testing.T) {
 }
 
 func TestDeleteUserNominal(t *testing.T) {
-	token, err0 := getToken(common.ADMINLOGIN, common.ADMINPWD)
+	token, err0 := getToken(setting.ADMINLOGIN, setting.ADMINPWD)
 	if err0 != nil {
 		t.Error(err0)
 	}
@@ -170,13 +169,4 @@ func TestDeleteUserNominal(t *testing.T) {
 	if user2.Activated == true {
 		t.Error("user is not deleted")
 	}
-}
-
-type HttpUser struct {
-	Username  string `json:"username"`
-	Lastname  string `json:"lastname"`
-	Firstname string `json:"firstname"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	Role_id   int    `json:"role_id"`
 }

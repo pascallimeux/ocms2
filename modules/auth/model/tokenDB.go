@@ -16,8 +16,8 @@ package model
 import (
 	"errors"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/pascallimeux/auth/modules/log"
-	"github.com/pascallimeux/auth/utils"
+	"github.com/pascallimeux/ocms2/modules/common"
+	"github.com/pascallimeux/ocms2/modules/log"
 	"time"
 )
 
@@ -29,7 +29,7 @@ func (a *SqlContext) CreateToken(user User, expire_in time.Duration) (interface{
 		Expires_in time.Time
 	}
 	var token Token
-	token.Token = utils.Generate_Token()
+	token.Token = common.Generate_Token()
 	token.Expires_in = time.Now().Add(expire_in * time.Hour)
 	stmt, err1 := a.Db.Prepare(sql)
 	if err1 != nil {

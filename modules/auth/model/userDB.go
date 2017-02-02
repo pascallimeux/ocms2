@@ -16,8 +16,8 @@ package model
 import (
 	"errors"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/pascallimeux/auth/modules/log"
-	"github.com/pascallimeux/auth/utils"
+	"github.com/pascallimeux/ocms2/modules/common"
+	"github.com/pascallimeux/ocms2/modules/log"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
@@ -26,7 +26,7 @@ func (a *SqlContext) CreateUser(username, lastname, firstname, email, password s
 	log.Trace(log.Here(), "CreateUser() : calling method -")
 	sql := "insert into users (Id, Username, Lastname, Firstname, Email, Password, CreatedAt, UpdatedAt, Activated , Role_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	var user User
-	user.Id = utils.Generate_uuid()
+	user.Id = common.Generate_uuid()
 	user.Username = username
 	user.Lastname = lastname
 	user.Firstname = firstname

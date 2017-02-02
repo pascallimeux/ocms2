@@ -1,5 +1,5 @@
 /*
-Copyright Pascal Limeux. 2016 All Rights Reserved.
+Copyright Pascal Limeux. 2017 All Rights Reserved.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,10 +14,9 @@ limitations under the License.
 package main
 
 import (
-	"github.com/pascallimeux/auth/controllers"
-	"github.com/pascallimeux/auth/model"
-	"github.com/pascallimeux/auth/modules/log"
-	"github.com/pascallimeux/auth/modules/setting"
+	"github.com/pascallimeux/ocms2/modules/auth/initialize"
+	"github.com/pascallimeux/ocms2/modules/auth/setting"
+	"github.com/pascallimeux/ocms2/modules/log"
 	"net/http"
 	"os"
 	"time"
@@ -32,28 +31,18 @@ func main() {
 		initDB = true
 	}
 
-	// Init settings
-	configuration, err := setting.GetSettings(".", "settings")
+	configuration, err := setting.GetSettings(".", "authsettings")
 	if err != nil {
 		panic(err.Error())
 	}
 
-	// Init logger
-	f := log.Init_log(configuration.LogFileName, configuration.LogMode)
-	defer f.Close()
-
-	// Init application context
-	appContext := controllers.AppContext{Settings: configuration}
-
-	// Init sqliteDB
-	sqlContext, err := model.GetSqlContext(configuration.DataSourceName, initDB)
-	if err != nil {
-		log.Fatal(log.Here(), err.Error())
+	// Init application
+	router, authContext, err2 := initialize.Init(initDB, configuration)
+	if err2 != nil {
+		panic(err2.Error())
 	}
-	defer sqlContext.Db.Close()
+	defer authContext.SqlContext.Db.Close()
 
-	// Init and Start http server
-	router := appContext.CreateRoutes()
 	log.Info(log.Here(), "Listening on: ", configuration.HttpHostUrl)
 	s := &http.Server{
 		Addr:         configuration.HttpHostUrl,

@@ -1,9 +1,9 @@
+[OCMSversion]
+version = "1.0.1 (2017-02-01)"
+
 [logger]
 mode = "Trace"
-logFileName = "auth.log"
-
-[database]
-dataSourceName = "auth.db"
+logFileName = "./logs/ocms.log"
 
 [server]
 #httpHostIp = "10.194.7.224"  
@@ -15,10 +15,11 @@ hLTimeout = 10000000000 # in nanoseconds
 deployTimeout = 7000000000 # in nanoseconds
 transactionTimeout = 5000000000 # in nanoseconds     
 
-[token]
-expireInToken = 24 # in hours
 
 [hyperledger]
 httpHyperledger = "http://10.194.18.49:7050"
 chainCodePath = "github.com/orangelabs/consent"
 chainCodeName = "41149f5089e76b3b95fcf20e25a64fde7be07452b602dafe78f192bf826c14da25a3767c3a281255f4f355842a5a87a366aca65f44f5a02afc1784417079b76e"
+applicationID = "280399A20162908Z"
+enrollID = "orange_user"      
+enrollSecret = "GtflmdhF6K32"

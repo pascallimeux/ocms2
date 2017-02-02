@@ -15,14 +15,13 @@ package controllers
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/pascallimeux/auth/model"
-	"github.com/pascallimeux/auth/modules/log"
-	"github.com/pascallimeux/auth/modules/setting"
+	"github.com/pascallimeux/ocms2/modules/auth/model"
+	"github.com/pascallimeux/ocms2/modules/auth/setting"
+	"github.com/pascallimeux/ocms2/modules/log"
 	"net/http"
 )
 
 const (
-	VERSIONURI  = "/o/version"
 	USERURI     = "/o/user"
 	REGISTERURI = "/o/register"
 	ROLEURI     = "/o/role"
@@ -32,15 +31,14 @@ const (
 
 type AppContext struct {
 	HttpServer *http.Server
-	Settings   setting.Settings
+	Settings   *setting.Settings
 	SqlContext model.SqlContext
 }
 
 // Initialize API
-func (appContext *AppContext) CreateRoutes() *mux.Router {
-	log.Trace(log.Here(), "createRoutes() : calling method -")
+func (appContext *AppContext) CreateAUTHRoutes() *mux.Router {
+	log.Trace(log.Here(), "CreateAUTHRoutes() : calling method -")
 	router := mux.NewRouter().StrictSlash(false)
-	router.HandleFunc(VERSIONURI, appContext.getVersion).Methods("GET")
 
 	router.HandleFunc(REGISTERURI, appContext.registerUser).Methods("POST")     // create user
 	router.HandleFunc(USERURI+"/{id}", appContext.getUser).Methods("GET")       // read a user

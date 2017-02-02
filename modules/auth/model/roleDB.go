@@ -16,7 +16,7 @@ package model
 import (
 	"errors"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/pascallimeux/auth/modules/log"
+	"github.com/pascallimeux/ocms2/modules/log"
 	"strconv"
 )
 

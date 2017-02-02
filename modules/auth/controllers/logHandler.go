@@ -15,9 +15,9 @@ package controllers
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/pascallimeux/auth/model"
-	"github.com/pascallimeux/auth/modules/log"
-	"github.com/pascallimeux/auth/utils"
+	"github.com/pascallimeux/ocms2/modules/auth/model"
+	"github.com/pascallimeux/ocms2/modules/common"
+	"github.com/pascallimeux/ocms2/modules/log"
 	"net/http"
 	"time"
 )
@@ -26,24 +26,24 @@ import (
 func (a *AppContext) getLogs(w http.ResponseWriter, r *http.Request) {
 	log.Trace(log.Here(), "getLogs() : calling method -")
 
-	err0 := a.checkPermissionFromToken(w, r, "getLogs", "")
+	err0 := a.CheckPermissionFromToken(w, r, "getLogs", "")
 	if err0 != nil {
 		return
 	}
 
 	logs, err := a.SqlContext.GetLogs()
 	if err != nil {
-		sendError(log.Here(), w, err)
+		common.SendError(log.Here(), w, err)
 		return
 	}
-	buildHttp200Response(w, logs)
+	common.BuildHttp200Response(w, logs)
 }
 
 //HTTP Get - /o/logs/{from}/{to}
 func (a *AppContext) getLogs4dates(w http.ResponseWriter, r *http.Request) {
 	log.Trace(log.Here(), "getLogs() : calling method -")
 
-	err0 := a.checkPermissionFromToken(w, r, "getLogs", "")
+	err0 := a.CheckPermissionFromToken(w, r, "getLogs", "")
 	if err0 != nil {
 		return
 	}
@@ -53,20 +53,20 @@ func (a *AppContext) getLogs4dates(w http.ResponseWriter, r *http.Request) {
 	var date1, date2 time.Time
 	var logs []model.Logg
 
-	date1, err = utils.DateParse(vars["from"])
+	date1, err = common.DateParse(vars["from"])
 	if err != nil {
-		sendError(log.Here(), w, err)
+		common.SendError(log.Here(), w, err)
 		return
 	}
-	date2, err = utils.DateParse(vars["to"])
+	date2, err = common.DateParse(vars["to"])
 	if err != nil {
-		sendError(log.Here(), w, err)
+		common.SendError(log.Here(), w, err)
 		return
 	}
 	logs, err = a.SqlContext.GetLog4Period(date1, date2)
 	if err != nil {
-		sendError(log.Here(), w, err)
+		common.SendError(log.Here(), w, err)
 		return
 	}
-	buildHttp200Response(w, logs)
+	common.BuildHttp200Response(w, logs)
 }

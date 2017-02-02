@@ -16,7 +16,7 @@ package model
 import (
 	"errors"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/pascallimeux/auth/modules/log"
+	"github.com/pascallimeux/ocms2/modules/log"
 	"strconv"
 	"time"
 )
@@ -81,6 +81,21 @@ func (a *SqlContext) GetPermissions() ([]Permission, error) {
 	return result, nil
 }
 
+func (a *SqlContext) DeletePermission(resourceName string, roleCode int) error {
+	log.Trace(log.Here(), "DeletePermission() : calling method -")
+	sql := "delete from permissions where Resource_name = ? and Role_code = ? "
+	stmt, err1 := a.Db.Prepare(sql)
+	if err1 != nil {
+		return err1
+	}
+	defer stmt.Close()
+	_, err2 := stmt.Exec(resourceName, roleCode)
+	if err2 != nil {
+		return err2
+	}
+	return nil
+}
+
 func (a *SqlContext) IsAuthorized4Token(tokenValue, resourceName, resourceId string) error {
 	log.Trace(log.Here(), "IsAuthorized4Token() : calling method -")
 
@@ -131,7 +146,7 @@ func (a *SqlContext) IsPermitted4User(userRole Role, userId, username, resourceN
 			}
 		}
 	}
-	logs := Logg{CreatedAt: time.Now(), Resource_name: resourceName, Resource_param: resourceParam, User_id: userId, Username: username, Access_granted: granted}
+	logs := Logg{Timestamp: time.Now(), Resource_name: resourceName, Resource_param: resourceParam, User_id: userId, Username: username, Access_granted: granted}
 	_, err = a.CreateLog(logs)
 	if err != nil {
 		log.Error(log.Here(), err.Error())
