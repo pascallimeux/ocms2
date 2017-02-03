@@ -1,0 +1,9 @@
+[Unit]
+Description=OCMS2 Service  
+
+[Service]
+ExecStart=/bin/sh -c "/data/ocms2/dist/start_ocms.sh"
+ExecStop=/bin/sh -c "/data/ocms2/dist/stop_ocms.sh"
+
+[Install]
+WantedBy=multi-user.target   

@@ -266,9 +266,21 @@ func check_args(consent *model.Consent) error {
 
 func buildDecodedConsent(transaction hyperledger.Transaction) ([]byte, error) {
 	log.Trace(log.Here(), "buildDecodedConsent() : calling method -")
-	decConsent := model.DecodedConsent{}
-	decConsent.Txuuid = transaction.Txid
-	decConsent.Ccid = transaction.ChaincodeID
+	type DecodedConsent struct {
+		txuuid     string
+		appid      string
+		ownerid    string
+		consumerid string
+		datatype   string
+		dataaccess string
+		dt_begin   string
+		dt_end     string
+		ccid       string
+	}
+
+	decConsent := DecodedConsent{}
+	decConsent.txuuid = transaction.Txid
+	decConsent.ccid = transaction.ChaincodeID
 	decPayload, _ := b64.StdEncoding.DecodeString(transaction.Payload)
 	//ccid := string(decPayload[11:139])
 	args := make([]string, 9)
@@ -285,13 +297,13 @@ func buildDecodedConsent(transaction hyperledger.Transaction) ([]byte, error) {
 			i++
 		}
 	}
-	decConsent.Appid = string(fmt.Sprintf("%v", args[2]))
-	decConsent.Ownerid = string(fmt.Sprintf("%v", args[3]))
-	decConsent.Consumerid = string(fmt.Sprintf("%v", args[4]))
-	decConsent.Datatype = string(fmt.Sprintf("%v", args[5]))
-	decConsent.Dataaccess = string(fmt.Sprintf("%v", args[6]))
-	decConsent.Dt_begin = string(fmt.Sprintf("%v", args[7]))
-	decConsent.Dt_end = string(fmt.Sprintf("%v", args[8]))
+	decConsent.appid = string(fmt.Sprintf("%v", args[2]))
+	decConsent.ownerid = string(fmt.Sprintf("%v", args[3]))
+	decConsent.consumerid = string(fmt.Sprintf("%v", args[4]))
+	decConsent.datatype = string(fmt.Sprintf("%v", args[5]))
+	decConsent.dataaccess = string(fmt.Sprintf("%v", args[6]))
+	decConsent.dt_begin = string(fmt.Sprintf("%v", args[7]))
+	decConsent.dt_end = string(fmt.Sprintf("%v", args[8]))
 	js, err := json.Marshal(decConsent)
 	if err != nil {
 		return nil, err

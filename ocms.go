@@ -34,7 +34,7 @@ func main() {
 	}
 
 	// Init settings
-	configuration, err := setting.GetSettings(".", "settings")
+	configuration, err := setting.GetSettings(".", "ocms")
 	if err != nil {
 		panic(err.Error())
 	}

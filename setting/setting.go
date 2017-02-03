@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -49,11 +50,34 @@ func (s *Settings) ToString() string {
 	return st
 }
 
+func findConfigFile(configPath, configFileName string) error {
+	path := configPath + "/" + configFileName + ".toml"
+	if _, err := os.Stat(path); err != nil {
+		configPath = os.Getenv("OCMSPATH")
+		if configPath == "" {
+			return errors.New("no config file found!")
+		} else {
+			fmt.Println("read config file: " + configPath + "/" + configFileName + ".toml")
+			viper.SetConfigName(configFileName)
+			viper.AddConfigPath(configPath)
+			return nil
+		}
+	} else {
+		fmt.Println("read config file: ", path)
+		viper.SetConfigName(configFileName)
+		viper.AddConfigPath(configPath)
+		return nil
+	}
+}
+
 func GetSettings(configPath, configFileName string) (Settings, error) {
 	var configuration Settings
-	viper.SetConfigName(configFileName)
-	viper.AddConfigPath(configPath)
-	err := viper.ReadInConfig()
+	err := findConfigFile(configPath, configFileName)
+	if err != nil {
+		fmt.Println(err.Error())
+		return configuration, errors.New("Config file not found...")
+	}
+	err = viper.ReadInConfig()
 	if err != nil {
 		fmt.Println(err.Error())
 		return configuration, errors.New("Config file not found...")
@@ -61,7 +85,11 @@ func GetSettings(configPath, configFileName string) (Settings, error) {
 		configuration.Version = viper.GetString("OCMSversion.version")
 
 		configuration.LogMode = viper.GetString("logger.mode")
-		configuration.LogFileName = viper.GetString("logger.logFileName")
+		configuration.LogFileName = os.Getenv("OCMSLOGFILE")
+		if configuration.LogFileName == "" {
+			return configuration, errors.New("No logfile defined!")
+		}
+		//configuration.LogFileName = viper.GetString("logger.logFileName")
 
 		configuration.HttpHostUrl, err = getHostUrl()
 		if err != nil {

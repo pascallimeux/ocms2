@@ -6,8 +6,8 @@ mode = "Trace"
 logFileName = "./logs/ocms.log"
 
 [server]
-#httpHostIp = "10.194.7.224"  
-httpHostPort = 8020 
+#httpHostIp = "10.194.18.46"  
+httpHostPort = 8033 
 readTimeout = 5000000000 # in nanoseconds
 writeTimeout = 10000000000 # in nanoseconds
 handlerTimeout = 12000000000 # in nanoseconds

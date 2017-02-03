@@ -238,8 +238,8 @@ func TestUnctivateConsentNominal(t *testing.T) {
 	consumerID := "BBBB"
 	datatype := "BP"
 	dataaccess := "R"
-	dt_begin := "2016-09-04"
-	dt_end := "2016-12-24"
+	dt_begin := common.GetStringDateNow(0)
+	dt_end := common.GetStringDateNow(1)
 	tr_uuid, err := consent_helper.CreateConsent(config.ApplicationID, ownerID, consumerID, datatype, dataaccess, dt_begin, dt_end)
 	if err != nil {
 		t.Error(err)
@@ -259,11 +259,8 @@ func TestUnctivateConsentNominal(t *testing.T) {
 	}
 	time.Sleep(TransactionTimeout)
 	consent2, err3 := consent_helper.GetConsent(config.ApplicationID, tr_uuid)
-	if err3 != nil {
+	if err3 == nil {
 		t.Error(err3)
-	}
-	if consent2.State == "True" {
-		t.Error()
 	}
 }
 

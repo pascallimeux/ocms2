@@ -25,7 +25,7 @@ func Init(initDB bool, configuration *setting.Settings) (*mux.Router, controller
 	if configuration == nil {
 		var err error
 		// Init settings
-		configuration, err = setting.GetSettings(".", "authsettings")
+		configuration, err = setting.GetSettings(".", "auth")
 		if err != nil {
 			panic(err.Error())
 		}

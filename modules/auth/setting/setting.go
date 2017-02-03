@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -40,32 +41,62 @@ func (s *Settings) ToString() string {
 	return st
 }
 
+func findConfigFile(configPath, configFileName string) error {
+	path := configPath + "/" + configFileName + ".toml"
+	if _, err := os.Stat(path); err != nil {
+		configPath = os.Getenv("AUTHPATH")
+		if configPath == "" {
+			return errors.New("no config file found!")
+		} else {
+			fmt.Println("read config file: " + configPath + "/" + configFileName + ".toml")
+			viper.SetConfigName(configFileName)
+			viper.AddConfigPath(configPath)
+			return nil
+		}
+	} else {
+		fmt.Println("read config file: ", path)
+		viper.SetConfigName(configFileName)
+		viper.AddConfigPath(configPath)
+		return nil
+	}
+}
+
 func GetSettings(configPath, configFileName string) (*Settings, error) {
 	var configuration Settings
-	viper.SetConfigName(configFileName)
-	viper.AddConfigPath(configPath)
-	err := viper.ReadInConfig()
+	err := findConfigFile(configPath, configFileName)
 	if err != nil {
 		fmt.Println(err.Error())
 		return &configuration, errors.New("Config file not found...")
-	} else {
-		configuration.LogMode = viper.GetString("logger.mode")
-		configuration.LogFileName = viper.GetString("logger.logFileName")
-
-		configuration.DataSourceName = viper.GetString("database.dataSourceName")
-
-		configuration.HttpHostUrl, err = getHostUrl()
-		if err != nil {
-			return &configuration, err
-		}
-		configuration.ReadTimeout = viper.GetDuration("server.readTimeout")
-		configuration.WriteTimeout = viper.GetDuration("server.writeTimeout")
-
-		configuration.ExpireInToken = viper.GetDuration("token.expireInToken")
-
-		fmt.Println("Account module configuration: \n" + configuration.ToString())
-		return &configuration, nil
 	}
+	err = viper.ReadInConfig()
+	if err != nil {
+		fmt.Println(err.Error())
+		return &configuration, errors.New("Config file not found...")
+	}
+	configuration.LogMode = viper.GetString("logger.mode")
+	//configuration.LogFileName = viper.GetString("logger.logFileName")
+	configuration.LogFileName = os.Getenv("AUTHLOGFILE")
+	if configuration.LogFileName == "" {
+		return &configuration, errors.New("No logfile defined!")
+	}
+
+	//configuration.DataSourceName = viper.GetString("database.dataSourceName")
+	configuration.DataSourceName = os.Getenv("AUTHDBNAME")
+	if configuration.DataSourceName == "" {
+		return &configuration, errors.New("No DBname defined!")
+	}
+
+	configuration.HttpHostUrl, err = getHostUrl()
+	if err != nil {
+		return &configuration, err
+	}
+	configuration.ReadTimeout = viper.GetDuration("server.readTimeout")
+	configuration.WriteTimeout = viper.GetDuration("server.writeTimeout")
+
+	configuration.ExpireInToken = viper.GetDuration("token.expireInToken")
+
+	fmt.Println("Authentication module configuration: \n" + configuration.ToString())
+	return &configuration, nil
 }
 
 func getHostUrl() (string, error) {

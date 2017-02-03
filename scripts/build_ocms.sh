@@ -1,11 +1,13 @@
 #!/bin/bash
 echo "Build OCMS"
-go build -ldflags "-s" $GOPATH/src/github.com/pascallimeux/ocms2/ocms.go
-if [ ! -d "$GOPATH/src/github.com/pascallimeux/ocms2/dist" ]; then
-  mkdir $GOPATH/src/github.com/pascallimeux/ocms2/dist
+SRCPATH="$GOPATH/src/github.com/pascallimeux/ocms2"
+SRCBIN="/data/ocms2/dist"
+go build -ldflags "-s" $SRCPATH/ocms.go
+if [ ! -d "$SRCBIN" ]; then
+  mkdir $SRCBIN
 fi
-mv ocms $GOPATH/src/github.com/pascallimeux/ocms2/dist/ocms
-cp $GOPATH/src/github.com/pascallimeux/ocms2/settings.toml $GOPATH/src/github.com/pascallimeux/ocms2/dist/settings.toml
-cp $GOPATH/src/github.com/pascallimeux/ocms2/modules/auth/authsettings.toml $GOPATH/src/github.com/pascallimeux/ocms2/dist/authsettings.toml
-cp *.sh $GOPATH/src/github.com/pascallimeux/ocms2/dist
-chmod u+x $GOPATH/src/github.com/pascallimeux/ocms2/dist/*.sh
+mv ocms $SRCBIN/ocms
+cp $SRCPATH/ocms.toml $SRCBIN/ocms.toml
+cp $SRCPATH/modules/auth/auth.toml $SRCBIN/auth.toml
+cp *.sh $SRCBIN
+chmod u+x $SRCBIN/*.sh

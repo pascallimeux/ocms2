@@ -31,7 +31,7 @@ func main() {
 		initDB = true
 	}
 
-	configuration, err := setting.GetSettings(".", "authsettings")
+	configuration, err := setting.GetSettings(".", "auth")
 	if err != nil {
 		panic(err.Error())
 	}
