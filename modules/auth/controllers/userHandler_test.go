@@ -170,3 +170,73 @@ func TestDeleteUserNominal(t *testing.T) {
 		t.Error("user is not deleted")
 	}
 }
+
+func TestCreateUserWithBadToken(t *testing.T) {
+	_, statusCode, err := createUser("1111111111111111111111111111111111111111", HttpUser{Username: "username1", Lastname: "lastname1", Firstname: "firstname1", Email: "email1", Password: "password1", Role_id: 1})
+	if err != nil {
+		t.Error(err)
+	}
+	if statusCode != http.StatusUnauthorized {
+		t.Error("Non-expected status code: ", http.StatusUnauthorized, " ", statusCode)
+	}
+}
+
+func TestCreateUserWithBadRole(t *testing.T) {
+	username := "user2"
+	password := "user_pwd2"
+	email := "user2@orange.fr"
+	role := 3
+
+	token, err0 := getToken(setting.ADMINLOGIN, setting.ADMINPWD)
+	if err0 != nil {
+		t.Error(err0)
+	}
+	_, _, err := createUser(token.Token, HttpUser{Username: username, Lastname: "", Firstname: "", Email: email, Password: password, Role_id: role})
+	if err != nil {
+		t.Error(err)
+	}
+
+	token, err2 := getToken(username, password)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	_, statusCode, err := createUser(token.Token, HttpUser{Username: "username1", Lastname: "lastname1", Firstname: "firstname1", Email: "email1", Password: "password1", Role_id: 1})
+	if err != nil {
+		t.Error(err)
+	}
+	if statusCode != http.StatusUnauthorized {
+		t.Error("Non-expected status code: ", http.StatusUnauthorized, " ", statusCode)
+	}
+}
+
+func TestCreateUserWithBadParams(t *testing.T) {
+	token, err0 := getToken(setting.ADMINLOGIN, setting.ADMINPWD)
+	if err0 != nil {
+		t.Error(err0)
+	}
+	_, statusCode, err := createUser(token.Token, HttpUser{Lastname: "lastname1", Firstname: "firstname1", Email: "email1", Password: "password1", Role_id: 1})
+	if err != nil {
+		t.Error(err)
+	}
+	if statusCode != http.StatusBadRequest {
+		t.Error("Non-expected status code: ", http.StatusBadRequest, " ", statusCode)
+	}
+}
+
+func TestUpdateUserWithBadToken(t *testing.T) {
+	token, err0 := getToken(setting.ADMINLOGIN, setting.ADMINPWD)
+	if err0 != nil {
+		t.Error(err0)
+	}
+	httpuser := HttpUser{Username: "username8", Lastname: "lastname8", Firstname: "firstname8", Email: "email8", Password: "password8", Role_id: 1}
+	user, _, _ := createUser(token.Token, httpuser)
+	newUser := "{\"Id\":\"" + user.Id + "\",\"Lastname\":\"lastname66\",\"Firstname\":\"firstname66\",\"Email\":\"email66\",\"Password\":\"password66\"}"
+	_, statusCode, err := updateUser("1111111111111111111111111111111111111111", newUser)
+	if err != nil {
+		t.Error(err)
+	}
+	if statusCode != http.StatusUnauthorized {
+		t.Error("Non-expected status code: ", http.StatusUnauthorized, " ", statusCode)
+	}
+}

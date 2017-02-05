@@ -1,14 +1,7 @@
 #!/bin/bash
 
-export OCMSPATH="/data/ocms2/dist"
-export AUTHPATH="/data/ocms2/dist"
-export OCMSLOGFILE="$OCMSPATH/logs/ocms.log"
-export AUTHLOGFILE="$AUTHPATH/logs/auth.log"
-export AUTHDBNAME="$AUTHPATH/db/auth.db"
-
-USER="pascal"
-LOGDIR="$AUTHPATH/logs"
-DBDIR="$AUTHPATH/db" 
+# mandatory to systemctl service
+. /data/ocms2/dist/env.sh
 
 if [ ! -d "$LOGDIR" ]; then
 	echo "Create log directory"
@@ -29,7 +22,7 @@ if [ "$1" ==  "init" ]
 	   rm auth.log
 	fi
  	echo "start auth init"
-    CMD="$OCMSPATH/ocms init &"
+    CMD="$OCMSPATH/ocms init "
  else
  	echo "start auth"
     CMD="$OCMSPATH/ocms "

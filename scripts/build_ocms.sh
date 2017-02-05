@@ -1,11 +1,15 @@
 #!/bin/bash
 echo "Build OCMS"
-SRCPATH="$GOPATH/src/github.com/pascallimeux/ocms2"
-SRCBIN="/data/ocms2/dist"
+. env.sh
+
 go build -ldflags "-s" $SRCPATH/ocms.go
+
 if [ ! -d "$SRCBIN" ]; then
-  mkdir $SRCBIN
+  sudo mkdir -p $SRCBIN
+  sudo chown -R $USER $DATAREPO
 fi
+
+
 mv ocms $SRCBIN/ocms
 cp $SRCPATH/ocms.toml $SRCBIN/ocms.toml
 cp $SRCPATH/modules/auth/auth.toml $SRCBIN/auth.toml

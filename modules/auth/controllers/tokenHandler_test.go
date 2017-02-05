@@ -15,9 +15,10 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/pascallimeux/ocms2/modules/auth/setting"
 	"net/http"
 	"testing"
+
+	"github.com/pascallimeux/ocms2/modules/auth/setting"
 )
 
 func TestCreateTokenNominal(t *testing.T) {
@@ -53,7 +54,7 @@ func TestUserTokenNominal(t *testing.T) {
 		t.Error(err)
 	}
 
-	token, err2 := GetToken(username, password)
+	token, err2 := getToken(username, password)
 	if err2 != nil {
 		t.Error(err2)
 	}
