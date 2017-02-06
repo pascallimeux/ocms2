@@ -266,21 +266,22 @@ func check_args(consent *model.Consent) error {
 
 func buildDecodedConsent(transaction hyperledger.Transaction) ([]byte, error) {
 	log.Trace(log.Here(), "buildDecodedConsent() : calling method -")
+
 	type DecodedConsent struct {
-		txuuid     string
-		appid      string
-		ownerid    string
-		consumerid string
-		datatype   string
-		dataaccess string
-		dt_begin   string
-		dt_end     string
-		ccid       string
+		Txuuid     string `json:"txuuid"`
+		Appid      string `json:"appid"`
+		Ownerid    string `json:"ownerid"`
+		Consumerid string `json:"consumerid"`
+		Datatype   string `json:"datatype"`
+		Dataaccess string `json:"dataaccess"`
+		Dt_begin   string `json:"dt_begin"`
+		Dt_end     string `json:"dt_end"`
+		Ccid       string `json:"ccid"`
 	}
 
 	decConsent := DecodedConsent{}
-	decConsent.txuuid = transaction.Txid
-	decConsent.ccid = transaction.ChaincodeID
+	decConsent.Txuuid = transaction.Txid
+	decConsent.Ccid = transaction.ChaincodeID
 	decPayload, _ := b64.StdEncoding.DecodeString(transaction.Payload)
 	//ccid := string(decPayload[11:139])
 	args := make([]string, 9)
@@ -297,16 +298,18 @@ func buildDecodedConsent(transaction hyperledger.Transaction) ([]byte, error) {
 			i++
 		}
 	}
-	decConsent.appid = string(fmt.Sprintf("%v", args[2]))
-	decConsent.ownerid = string(fmt.Sprintf("%v", args[3]))
-	decConsent.consumerid = string(fmt.Sprintf("%v", args[4]))
-	decConsent.datatype = string(fmt.Sprintf("%v", args[5]))
-	decConsent.dataaccess = string(fmt.Sprintf("%v", args[6]))
-	decConsent.dt_begin = string(fmt.Sprintf("%v", args[7]))
-	decConsent.dt_end = string(fmt.Sprintf("%v", args[8]))
+	fmt.Printf("%#v\n", args)
+	decConsent.Appid = string(fmt.Sprintf("%v", args[2]))
+	decConsent.Ownerid = string(fmt.Sprintf("%v", args[3]))
+	decConsent.Consumerid = string(fmt.Sprintf("%v", args[4]))
+	decConsent.Datatype = string(fmt.Sprintf("%v", args[5]))
+	decConsent.Dataaccess = string(fmt.Sprintf("%v", args[6]))
+	decConsent.Dt_begin = string(fmt.Sprintf("%v", args[7]))
+	decConsent.Dt_end = string(fmt.Sprintf("%v", args[8]))
 	js, err := json.Marshal(decConsent)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("TRconsent: ", string(js))
 	return js, nil
 }
